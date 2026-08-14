@@ -69,7 +69,7 @@ export function UserLayout() {
         ))}
       </nav>
 
-      <div className="p-3 border-t border-soc-border">
+      <div className="p-3 border-t border-soc-border space-y-2">
         <div className="glass-soft rounded-xl p-3 flex items-center gap-2">
           <Shield className="w-4 h-4 text-emerald-400" />
           <div className="text-[11px] leading-tight">
@@ -77,6 +77,12 @@ export function UserLayout() {
             <p className="text-slate-500">MFA · Real-time monitoring</p>
           </div>
         </div>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors"
+        >
+          <LogOut className="w-4 h-4" /> Sign out
+        </button>
       </div>
     </div>
   );
