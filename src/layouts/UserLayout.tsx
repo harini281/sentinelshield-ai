@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, ArrowLeftRight, MonitorSmartphone, Bell, History,
   User as UserIcon, Settings as SettingsIcon, LogOut, Menu, X, ChevronRight, Shield,
+  ShieldAlert,
 } from 'lucide-react';
 import { ShieldLogo } from '@/components/ShieldLogo';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,6 +14,7 @@ const nav = [
   { to: '/user/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/user/transactions', label: 'My Transactions', icon: ArrowLeftRight },
   { to: '/user/devices', label: 'My Devices', icon: MonitorSmartphone },
+  { to: '/user/lost-phone', label: 'Lost Device Protection', icon: ShieldAlert },
   { to: '/user/alerts', label: 'Security Alerts', icon: Bell },
   { to: '/user/login-history', label: 'Login History', icon: History },
   { to: '/user/profile', label: 'Profile', icon: UserIcon },

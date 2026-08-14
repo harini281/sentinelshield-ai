@@ -20,6 +20,7 @@ const AdminAiInsights = lazy(() => import('@/pages/admin/AiInsights'));
 const AdminSimulator = lazy(() => import('@/pages/admin/Simulator'));
 const AdminReports = lazy(() => import('@/pages/admin/Reports'));
 const AdminSettings = lazy(() => import('@/pages/admin/Settings'));
+const AdminLostPhoneAttack = lazy(() => import('@/pages/admin/LostPhoneAttack'));
 
 const UserDashboard = lazy(() => import('@/pages/user/Dashboard'));
 const UserTransactions = lazy(() => import('@/pages/user/Transactions'));
@@ -28,6 +29,7 @@ const UserAlerts = lazy(() => import('@/pages/user/Alerts'));
 const UserLoginHistory = lazy(() => import('@/pages/user/LoginHistory'));
 const UserProfile = lazy(() => import('@/pages/user/Profile'));
 const UserSettings = lazy(() => import('@/pages/user/Settings'));
+const UserLostPhone = lazy(() => import('@/pages/user/LostPhone'));
 
 function PageFallback() {
   return (
@@ -77,6 +79,7 @@ function AppRoutes() {
           <Route path="threat-intel" element={<SuspenseWrap><AdminThreatIntel /></SuspenseWrap>} />
           <Route path="ai-insights" element={<SuspenseWrap><AdminAiInsights /></SuspenseWrap>} />
           <Route path="simulator" element={<SuspenseWrap><AdminSimulator pushToast={push} /></SuspenseWrap>} />
+          <Route path="lost-phone-attack" element={<SuspenseWrap><AdminLostPhoneAttack /></SuspenseWrap>} />
           <Route path="reports" element={<SuspenseWrap><AdminReports /></SuspenseWrap>} />
           <Route path="settings" element={<SuspenseWrap><AdminSettings /></SuspenseWrap>} />
         </Route>
@@ -98,6 +101,7 @@ function AppRoutes() {
           <Route path="login-history" element={<SuspenseWrap><UserLoginHistory /></SuspenseWrap>} />
           <Route path="profile" element={<SuspenseWrap><UserProfile /></SuspenseWrap>} />
           <Route path="settings" element={<SuspenseWrap><UserSettings /></SuspenseWrap>} />
+          <Route path="lost-phone" element={<SuspenseWrap><UserLostPhone /></SuspenseWrap>} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

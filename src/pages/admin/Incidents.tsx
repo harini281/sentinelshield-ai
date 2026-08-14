@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Siren, CheckCircle2, AlertTriangle, Clock, ShieldAlert } from 'lucide-react';
+import { Siren, CheckCircle2, AlertTriangle, Clock, ShieldAlert, Smartphone } from 'lucide-react';
 import { PageHeader } from '@/layouts/AdminLayout';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -16,14 +17,26 @@ const sevIcon: Record<string, typeof Siren> = {
   low: Clock,
 };
 
+const lostPhoneIncident: Incident = {
+  id: 'INC-LP-001',
+  type: 'Account Takeover — Owner Verification Required',
+  timestamp: new Date(Date.now() - 600000).toISOString(),
+  severity: 'critical',
+  affectedUser: 'Demo Customer',
+  recommendedResponse: 'Block device + Hold high-risk transactions + Freeze account',
+  resolved: false,
+};
+
 export default function Incidents() {
+  const navigate = useNavigate();
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'open' | 'resolved'>('all');
 
   useEffect(() => {
     (async () => {
-      setIncidents(await fraudService.getIncidents());
+      const incs = await fraudService.getIncidents();
+      setIncidents([lostPhoneIncident, ...incs]);
       setLoading(false);
     })();
   }, []);
@@ -106,7 +119,13 @@ export default function Incidents() {
 
                     <div className="mt-4 flex gap-2">
                       {!inc.resolved && <button className="flex-1 text-xs font-medium py-2 rounded-lg bg-soc-primary/20 text-soc-accent border border-soc-primary/40 hover:bg-soc-primary/30 transition-colors">Mark Resolved</button>}
-                      <button className="flex-1 text-xs font-medium py-2 rounded-lg glass-soft text-slate-300 hover:border-soc-accent/40 transition-colors">View Details</button>
+                      {inc.id === 'INC-LP-001' ? (
+                        <button onClick={() => navigate('/admin/lost-phone-attack')} className="flex-1 text-xs font-medium py-2 rounded-lg bg-soc-primary/20 text-soc-accent border border-soc-primary/40 hover:bg-soc-primary/30 transition-colors flex items-center justify-center gap-1.5">
+                          <Smartphone className="w-3.5 h-3.5" /> View Full Incident
+                        </button>
+                      ) : (
+                        <button className="flex-1 text-xs font-medium py-2 rounded-lg glass-soft text-slate-300 hover:border-soc-accent/40 transition-colors">View Details</button>
+                      )}
                     </div>
                   </CardBody>
                 </Card>

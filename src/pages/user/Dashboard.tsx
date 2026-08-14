@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -6,6 +7,7 @@ import {
 import {
   ShieldCheck, ArrowLeftRight, Bell, MonitorSmartphone, Lock, Download,
   TrendingUp, Activity, Sparkles, Fingerprint, Eye, AlertTriangle, Smartphone,
+  ShieldAlert,
 } from 'lucide-react';
 import { UserPageHeader } from '@/layouts/UserLayout';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -27,6 +29,7 @@ const tips = [
 
 export default function UserDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [tx, setTx] = useState<Transaction[]>([]);
   const [alerts, setAlerts] = useState<SecurityAlert[]>([]);
   const [devices, setDevices] = useState<Device[]>([]);
@@ -59,10 +62,10 @@ export default function UserDashboard() {
   }));
 
   const quickActions = [
-    { label: 'Download Statement', icon: Download, color: 'text-soc-accent' },
-    { label: 'Enable MFA', icon: Fingerprint, color: 'text-soc-primary' },
-    { label: 'Manage Devices', icon: MonitorSmartphone, color: 'text-blue-400' },
-    { label: 'Report Activity', icon: AlertTriangle, color: 'text-amber-400' },
+    { label: 'Download Statement', icon: Download, color: 'text-soc-accent', to: undefined },
+    { label: 'Enable MFA', icon: Fingerprint, color: 'text-soc-primary', to: undefined },
+    { label: 'Manage Devices', icon: MonitorSmartphone, color: 'text-blue-400', to: '/user/devices' },
+    { label: 'Report Lost Device', icon: ShieldAlert, color: 'text-amber-400', to: '/user/lost-phone' },
   ];
 
   return (
@@ -124,7 +127,7 @@ export default function UserDashboard() {
       {/* Quick actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
         {quickActions.map((a, i) => (
-          <motion.button key={a.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} whileHover={{ y: -3 }} className="text-left">
+          <motion.button key={a.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} whileHover={{ y: -3 }} className="text-left" onClick={() => a.to && navigate(a.to)}>
             <Card glow className="p-4 h-full">
               <div className="w-10 h-10 rounded-xl bg-soc-card2 flex items-center justify-center"><a.icon className={`w-5 h-5 ${a.color}`} /></div>
               <p className="text-sm font-medium text-white mt-3">{a.label}</p>

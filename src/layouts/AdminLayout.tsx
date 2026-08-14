@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, ArrowLeftRight, ShieldAlert, Siren, BarChart3, Users,
   BrainCircuit, FlaskConical, Settings, Bell, Search, LogOut, Menu, X,
-  ChevronRight, Globe, FileText,
+  ChevronRight, Globe, FileText, Smartphone,
 } from 'lucide-react';
 import { ShieldLogo } from '@/components/ShieldLogo';
 import { NotificationCenter } from '@/components/NotificationCenter';
@@ -22,6 +22,7 @@ const nav = [
   { to: '/admin/threat-intel', label: 'Threat Intelligence', icon: Globe },
   { to: '/admin/ai-insights', label: 'AI Insights', icon: BrainCircuit },
   { to: '/admin/simulator', label: 'Attack Simulator', icon: FlaskConical },
+  { to: '/admin/lost-phone-attack', label: 'Lost Phone Attack', icon: Smartphone },
   { to: '/admin/reports', label: 'Reports', icon: FileText },
   { to: '/admin/settings', label: 'Settings', icon: Settings },
 ];

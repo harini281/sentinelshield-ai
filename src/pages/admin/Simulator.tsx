@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FlaskConical, Zap, ShieldAlert, Ban, Globe2, Smartphone, Clock,
-  DollarSign, Activity, CheckCircle2, AlertTriangle, Lock,
+  DollarSign, Activity, CheckCircle2, AlertTriangle, Lock, KeyRound,
+  MapPin, Fingerprint, ShieldX, Snowflake, Brain, Cpu, XCircle,
 } from 'lucide-react';
 import { PageHeader } from '@/layouts/AdminLayout';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { useCountUp } from '@/hooks/useCountUp';
-import { riskColor, formatCurrency } from '@/utils/cn';
+import { riskColor, formatCurrency, cn } from '@/utils/cn';
 import type { ToastNotification, RiskLevel } from '@/types';
 
 interface SimResult {
@@ -44,6 +46,19 @@ export default function Simulation({ pushToast }: { pushToast: (t: Omit<ToastNot
   const [result, setResult] = useState<SimResult | null>(null);
   const [simulating, setSimulating] = useState(false);
   const [timeline, setTimeline] = useState<{ time: string; label: string; icon: typeof Zap; color: string }[]>([]);
+  const navigate = useNavigate();
+
+  // Lost phone demo state
+  const [lpSimulating, setLpSimulating] = useState(false);
+  const [lpStep, setLpStep] = useState(0);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  useEffect(() => () => timersRef.current.forEach(clearTimeout), []);
+
+  function addTimer(fn: () => void, delay: number) {
+    const t = setTimeout(fn, delay);
+    timersRef.current.push(t);
+  }
 
   function runSim() {
     setSimulating(true);
@@ -77,6 +92,47 @@ export default function Simulation({ pushToast }: { pushToast: (t: Omit<ToastNot
     });
   }
 
+  const lpDemoSteps = [
+    { label: 'Lost phone reported', icon: Smartphone, color: 'text-amber-400' },
+    { label: 'New device detected: Windows / Chrome', icon: Smartphone, color: 'text-orange-400' },
+    { label: 'Location: Unrecognized — Device Trust: LOW', icon: MapPin, color: 'text-orange-400' },
+    { label: 'Login Attempt 1 — Failed', icon: KeyRound, color: 'text-red-400' },
+    { label: 'Login Attempt 2 — Failed', icon: KeyRound, color: 'text-red-400' },
+    { label: 'Login Attempt 3 — Failed', icon: KeyRound, color: 'text-red-400' },
+    { label: 'Login Attempt 4 — Failed', icon: KeyRound, color: 'text-red-400' },
+    { label: 'Login Attempt 5 — Failed', icon: KeyRound, color: 'text-red-400' },
+    { label: '5 FAILED LOGIN ATTEMPTS — Authentication Risk: HIGH', icon: ShieldAlert, color: 'text-red-400' },
+    { label: 'Owner verification initiated', icon: Fingerprint, color: 'text-soc-primary' },
+    { label: 'Verification answers do not match account context', icon: XCircle, color: 'text-red-400' },
+    { label: 'Owner Verification Failed — Identity Confidence: LOW', icon: ShieldAlert, color: 'text-red-400' },
+    { label: 'Risk Score: 91/100 — CRITICAL', icon: AlertTriangle, color: 'text-red-400' },
+    { label: 'Device BLOCKED', icon: ShieldX, color: 'text-red-400' },
+    { label: 'High-risk transactions HELD', icon: ShieldAlert, color: 'text-orange-400' },
+    { label: 'Account FROZEN', icon: Snowflake, color: 'text-red-400' },
+  ];
+
+  function runLostPhoneSim() {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+    setLpSimulating(true);
+    setLpStep(0);
+    setResult(null);
+    setSimulating(false);
+
+    lpDemoSteps.forEach((_, i) => {
+      addTimer(() => setLpStep(i + 1), (i + 1) * 600);
+    });
+
+    addTimer(() => {
+      setLpSimulating(false);
+      pushToast({
+        title: 'Account Takeover Blocked',
+        message: 'Lost phone attack · 5 failed logins · Verification failed · Risk 91/100',
+        type: 'danger',
+      });
+    }, (lpDemoSteps.length + 1) * 600);
+  }
+
   return (
     <div>
       <PageHeader
@@ -99,7 +155,7 @@ export default function Simulation({ pushToast }: { pushToast: (t: Omit<ToastNot
               <ShieldAlert className={`w-12 h-12 ${simulating ? 'text-red-400 animate-pulse2' : 'text-slate-400'}`} />
             </motion.div>
 
-            <Button variant="danger" size="lg" onClick={runSim} disabled={simulating} className="w-full">
+            <Button variant="danger" size="lg" onClick={runSim} disabled={simulating || lpSimulating} className="w-full">
               {simulating ? (
                 <><motion.span animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" /> Simulating…</>
               ) : (
@@ -110,6 +166,41 @@ export default function Simulation({ pushToast }: { pushToast: (t: Omit<ToastNot
             <p className="mt-4 text-xs text-slate-500">
               Generates a synthetic high-risk transaction. The AI engine will analyze, score, and block it automatically.
             </p>
+
+            {/* Divider */}
+            <div className="w-full flex items-center gap-3 my-5">
+              <div className="flex-1 h-px bg-soc-border" />
+              <span className="text-[10px] font-mono uppercase tracking-widest text-slate-600">Hackathon Demo</span>
+              <div className="flex-1 h-px bg-soc-border" />
+            </div>
+
+            {/* Lost Phone Demo Button */}
+            <motion.div
+              animate={lpSimulating ? { scale: [1, 1.03, 1] } : {}}
+              transition={{ duration: 1.5, repeat: lpSimulating ? Infinity : 0 }}
+              className="w-full rounded-xl border border-soc-primary/40 bg-gradient-to-br from-soc-primary/15 to-soc-accent/10 p-4"
+            >
+              <div className="flex items-center gap-2 mb-3 justify-center">
+                <Brain className="w-5 h-5 text-soc-primary" />
+                <span className="text-xs font-bold uppercase tracking-wider text-soc-primary">Main Demo Flow</span>
+              </div>
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={runLostPhoneSim}
+                disabled={simulating || lpSimulating}
+                className="w-full"
+              >
+                {lpSimulating ? (
+                  <><motion.span animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" /> Simulating Lost Phone Attack…</>
+                ) : (
+                  <><Smartphone className="w-4 h-4" /> Simulate Lost Phone Attack</>
+                )}
+              </Button>
+              <p className="mt-3 text-xs text-slate-500">
+                Lost Phone → New Device → 5 Failed Logins → Owner Verification → Verification Failure → Risk 91/100 → Block Device → Hold Transaction
+              </p>
+            </motion.div>
           </CardBody>
         </Card>
 
@@ -218,6 +309,123 @@ export default function Simulation({ pushToast }: { pushToast: (t: Omit<ToastNot
             </CardBody>
           </Card>
         </div>
+      )}
+
+      {/* Lost Phone Demo Result */}
+      {lpSimulating && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+          <Card className="lg:col-span-2 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-soc-primary/8 to-transparent pointer-events-none" />
+            <motion.div
+              className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-soc-primary/40 to-transparent pointer-events-none"
+              animate={{ top: ['0%', '100%', '0%'] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+            />
+            <CardHeader className="relative">
+              <CardTitle className="flex items-center gap-2 text-soc-primary">
+                <Smartphone className="w-4 h-4" /> Lost Phone Attack — Live Demo
+              </CardTitle>
+              <Badge variant="critical">{lpStep}/{lpDemoSteps.length} steps</Badge>
+            </CardHeader>
+            <CardBody className="relative pt-0">
+              <div className="space-y-2 mt-4 max-h-[500px] overflow-y-auto">
+                {lpDemoSteps.slice(0, lpStep).map((s, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className={cn(
+                      'flex items-center gap-3 rounded-xl border p-3',
+                      i === lpStep - 1
+                        ? 'border-soc-primary/40 bg-soc-primary/10'
+                        : 'border-soc-border bg-soc-card2 opacity-70',
+                    )}
+                  >
+                    <s.icon className={cn('w-4 h-4 shrink-0', s.color)} />
+                    <span className="text-xs font-mono text-slate-500">{`Step ${i + 1}`}</span>
+                    <span className="text-sm text-slate-200">{s.label}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card className="relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent pointer-events-none" />
+            <CardHeader className="relative">
+              <CardTitle className="flex items-center gap-2 text-soc-primary">
+                <Cpu className="w-4 h-4" /> AI Analysis
+              </CardTitle>
+            </CardHeader>
+            <CardBody className="relative">
+              <div className="rounded-xl border border-soc-primary/30 bg-soc-primary/5 p-3">
+                <p className="text-xs text-slate-200 leading-relaxed">
+                  "The system cannot confidently establish that the person using the new device is the account owner. Multiple failed authentication attempts combined with a new device and verification mismatch indicate elevated account-takeover risk."
+                </p>
+              </div>
+              <div className="mt-3 space-y-2">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Risk Factors</p>
+                {[
+                  { label: 'New Device', pct: 30 },
+                  { label: 'Multiple Failed Logins', pct: 35 },
+                  { label: 'Unusual Location', pct: 20 },
+                  { label: 'Owner Verification Failure', pct: 15 },
+                ].map((f, i) => (
+                  <div key={f.label}>
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span className="text-slate-300">{f.label}</span>
+                      <span className="font-bold text-red-400">{f.pct}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-soc-border overflow-hidden">
+                      <motion.div
+                        className="h-full rounded-full bg-gradient-to-r from-amber-500 to-red-500"
+                        initial={{ width: 0 }}
+                        animate={{ width: lpStep > i + 8 ? `${f.pct}%` : 0 }}
+                        transition={{ duration: 0.6 }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-3 border-t border-soc-border">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-400">Risk Score</span>
+                  <span className="text-2xl font-bold text-red-400">{lpStep >= 13 ? '91' : '...'}<span className="text-sm text-slate-500">/100</span></span>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+        </div>
+      )}
+
+      {/* Lost Phone Demo Completed — open full incident */}
+      {!lpSimulating && lpStep > 0 && lpStep >= lpDemoSteps.length && (
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
+          <Card className="relative overflow-hidden border-emerald-500/30">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent pointer-events-none" />
+            <CardBody className="relative">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 200 }}
+                    className="w-14 h-14 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center"
+                  >
+                    <CheckCircle2 className="w-7 h-7 text-emerald-400" />
+                  </motion.div>
+                  <div>
+                    <p className="text-lg font-bold text-white">Lost Phone Attack Simulation Complete</p>
+                    <p className="text-xs text-slate-400">Device blocked · Transactions held · Account frozen · Risk 91/100</p>
+                  </div>
+                </div>
+                <Button variant="primary" size="lg" onClick={() => navigate('/admin/lost-phone-attack')}>
+                  <Activity className="w-4 h-4" /> View Full Incident
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
+        </motion.div>
       )}
     </div>
   );
